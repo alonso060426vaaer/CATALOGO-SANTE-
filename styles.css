@@ -1575,3 +1575,17 @@ body.modal-open {
 .editorial-duo .editorial-copy {
     z-index: 1;
 }
+
+/* Barra fija arriba: la franja de avisos y el menu quedan pegados al borde, a todo el ancho */
+.top-strip {
+    position: sticky;
+    top: 0;
+    z-index: 31;
+}
+
+.header {
+    width: 100%;
+    padding-left: max(1rem, calc((100% - 1320px) / 2));
+    padding-right: max(1rem, calc((100% - 1320px) / 2));
+    background: #fff;
+}
