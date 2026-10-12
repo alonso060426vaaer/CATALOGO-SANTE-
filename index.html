@@ -9,7 +9,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css?v=12">
+    <link rel="stylesheet" href="styles.css?v=13">
 </head>
 <body>
     <div class="top-strip" aria-label="Avisos de tienda">
@@ -23,8 +23,12 @@
     <header class="header">
         <a href="#inicio" class="brand" aria-label="SANTÉ inicio">SANTÉ</a>
 
-        <nav class="menu" aria-label="Menu principal">
-            <a href="#inicio">INICIO</a>
+        <nav class="menu" id="menu-principal" aria-label="Menu principal">
+            <form class="search-box menu-search" action="productos.html" role="search">
+                <svg class="search-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="11" cy="11" r="7"></circle><path d="M20 20l-3.5-3.5"></path></svg>
+                <input type="search" name="q" placeholder="Buscar modelo o color" aria-label="Buscar modelo o color">
+            </form>
+            <a href="#inicio" class="is-active">INICIO</a>
             <a href="productos.html?cat=mujer">MUJER</a>
             <a href="productos.html?cat=hombre">HOMBRE</a>
             <a href="productos.html?cat=batas">BATAS</a>
@@ -33,9 +37,12 @@
 
         <div class="header-actions">
             <form class="search-box" action="productos.html" role="search">
+                <svg class="search-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="11" cy="11" r="7"></circle><path d="M20 20l-3.5-3.5"></path></svg>
                 <input type="search" name="q" placeholder="BUSCAR" aria-label="Buscar modelo o color">
             </form>
-            <button class="menu-toggle" type="button" aria-label="Abrir menu">MENU</button>
+            <button class="menu-toggle" type="button" aria-label="Abrir menu" aria-expanded="false" aria-controls="menu-principal">
+                <span class="menu-toggle-bars" aria-hidden="true"></span>
+            </button>
         </div>
     </header>
 
@@ -173,6 +180,6 @@
         </div>
     </footer>
 
-    <script src="main.js?v=8"></script>
+    <script src="main.js?v=9"></script>
 </body>
 </html>

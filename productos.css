@@ -2,37 +2,6 @@
     background: #fff;
 }
 
-.products-page .top-strip {
-    display: none;
-}
-
-.products-page .header {
-    width: 100%;
-    min-height: 76px;
-    top: 0;
-    padding: 0 1.55rem;
-    background: #fff;
-    border-bottom: 1px solid #eeeeee;
-}
-
-.products-page .brand {
-    font-size: 1.7rem;
-}
-
-.products-page .menu {
-    gap: 2rem;
-}
-
-.products-page .menu a {
-    font-size: 1rem;
-}
-
-.products-page .search-box input {
-    width: 220px;
-    height: 50px;
-    font-size: 0.9rem;
-}
-
 .products-page .plp-shell {
     width: 100%;
     margin: 0;
@@ -375,19 +344,6 @@ body.modal-open {
 
 /* Responsive 760px */
 @media (max-width: 760px) {
-    .products-page .header {
-        min-height: 64px;
-        padding: 0.65rem 1rem;
-    }
-
-    .products-page .menu {
-        display: none;
-    }
-
-    .products-page .search-box {
-        display: none;
-    }
-
     .products-page .plp-grid {
         grid-template-columns: repeat(2, minmax(0, 1fr));
         gap: 1.35rem 0;
@@ -482,14 +438,6 @@ body.modal-open {
     content: 'Colores: ';
     font-weight: 600;
     color: #444;
-}
-
-.products-page .search-box input {
-    height: 40px;
-}
-
-.products-page .menu a.is-active::after {
-    transform: scaleX(1);
 }
 
 /* Barra de categorias: Todo / Mujer / Hombre / Batas */
@@ -613,10 +561,6 @@ body.modal-open {
 }
 
 @media (max-width: 760px) {
-    .products-page .menu.open {
-        display: flex;
-    }
-
     .products-page .plp-bar {
         padding: 1.1rem 1rem 1rem;
         margin-bottom: 1.2rem;
@@ -632,5 +576,12 @@ body.modal-open {
 
     .products-page .plp-grid.is-filtered .product-carousel {
         height: clamp(260px, 64vw, 380px);
+    }
+}
+/* Titulo y botones de categoria alineados con el logo del encabezado */
+@media (min-width: 761px) {
+    .products-page .plp-bar {
+        padding-left: max(1.25rem, calc((100% - 1320px) / 2));
+        padding-right: max(1.25rem, calc((100% - 1320px) / 2));
     }
 }

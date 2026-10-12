@@ -8,8 +8,8 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css?v=12">
-    <link rel="stylesheet" href="productos.css?v=11">
+    <link rel="stylesheet" href="styles.css?v=13">
+    <link rel="stylesheet" href="productos.css?v=13">
 </head>
 <body class="products-page">
     <div class="top-strip" aria-label="Avisos de tienda">
@@ -22,7 +22,11 @@
 
     <header class="header">
         <a href="index.html" class="brand" aria-label="SANTÉ inicio">SANTÉ</a>
-        <nav class="menu" aria-label="Menu principal">
+        <nav class="menu" id="menu-principal" aria-label="Menu principal">
+            <form class="search-box menu-search" action="productos.html" role="search" data-search>
+                <svg class="search-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="11" cy="11" r="7"></circle><path d="M20 20l-3.5-3.5"></path></svg>
+                <input type="search" name="q" placeholder="Buscar modelo o color" aria-label="Buscar modelo o color">
+            </form>
             <a href="index.html">INICIO</a>
             <a href="productos.html?cat=mujer" data-cat="mujer">MUJER</a>
             <a href="productos.html?cat=hombre" data-cat="hombre">HOMBRE</a>
@@ -31,9 +35,12 @@
         </nav>
         <div class="header-actions">
             <form class="search-box" action="productos.html" role="search" data-search>
+                <svg class="search-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="11" cy="11" r="7"></circle><path d="M20 20l-3.5-3.5"></path></svg>
                 <input type="search" name="q" placeholder="BUSCAR" aria-label="Buscar modelo o color">
             </form>
-            <button class="menu-toggle" type="button" aria-label="Abrir menu">MENU</button>
+            <button class="menu-toggle" type="button" aria-label="Abrir menu" aria-expanded="false" aria-controls="menu-principal">
+                <span class="menu-toggle-bars" aria-hidden="true"></span>
+            </button>
         </div>
     </header>
 
@@ -330,6 +337,6 @@
         </section>
     </div>
 
-    <script src="main.js?v=8"></script>
+    <script src="main.js?v=9"></script>
 </body>
 </html>

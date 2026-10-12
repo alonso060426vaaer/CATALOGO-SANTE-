@@ -21,13 +21,107 @@ if ('IntersectionObserver' in window) {
     revealElements.forEach((element) => element.classList.add('visible'));
 }
 
+const header = document.querySelector('.header');
 const toggleButton = document.querySelector('.menu-toggle');
 const menu = document.querySelector('.menu');
+const esCelular = window.matchMedia('(max-width: 860px)');
 
-if (toggleButton && menu) {
+const abrirMenu = (abrir) => {
+    if (!header || !toggleButton) {
+        return;
+    }
+
+    header.classList.toggle('is-menu-open', abrir);
+    toggleButton.setAttribute('aria-expanded', abrir ? 'true' : 'false');
+    toggleButton.setAttribute('aria-label', abrir ? 'Cerrar menu' : 'Abrir menu');
+
+    if (abrir) {
+        header.classList.remove('is-hidden');
+    }
+};
+
+const cerrarMenu = () => abrirMenu(false);
+
+if (header && toggleButton && menu) {
     toggleButton.addEventListener('click', () => {
-        menu.classList.toggle('open');
+        abrirMenu(!header.classList.contains('is-menu-open'));
     });
+
+    menu.querySelectorAll('a').forEach((link) => link.addEventListener('click', cerrarMenu));
+
+    document.addEventListener('click', (event) => {
+        if (header.classList.contains('is-menu-open') && !header.contains(event.target)) {
+            cerrarMenu();
+        }
+    });
+
+    document.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape') {
+            cerrarMenu();
+        }
+    });
+
+    esCelular.addEventListener('change', cerrarMenu);
+}
+
+// Encabezado: sombra al bajar; en celular se esconde al bajar y vuelve al subir.
+if (header) {
+    let ultimoY = window.scrollY;
+    let pendiente = false;
+
+    const actualizarEncabezado = () => {
+        pendiente = false;
+        const y = Math.max(window.scrollY, 0);
+        const delta = y - ultimoY;
+        // offsetTop no sirve: en un elemento sticky cambia mientras se baja.
+        const franja = document.querySelector('.top-strip');
+        const cercaDeArriba = y < (franja ? franja.offsetHeight : 0) + header.offsetHeight + 80;
+
+        header.classList.toggle('is-scrolled', y > 8);
+
+        if (!esCelular.matches || cercaDeArriba || header.classList.contains('is-menu-open') || document.body.classList.contains('modal-open')) {
+            header.classList.remove('is-hidden');
+        } else if (delta > 8) {
+            header.classList.add('is-hidden');
+        } else if (delta < -8) {
+            header.classList.remove('is-hidden');
+        }
+
+        // Pequeños temblores del dedo no cuentan como cambio de direccion.
+        if (Math.abs(delta) > 8 || cercaDeArriba) {
+            ultimoY = y;
+        }
+    };
+
+    window.addEventListener('scroll', () => {
+        if (!pendiente) {
+            pendiente = true;
+            window.requestAnimationFrame(actualizarEncabezado);
+        }
+    }, { passive: true });
+
+    actualizarEncabezado();
+}
+
+// Franja de avisos: en celular se muestra un aviso a la vez.
+const avisos = document.querySelector('.top-strip-inner');
+
+if (avisos && avisos.children.length > 1) {
+    const items = Array.from(avisos.children);
+    let avisoActual = 0;
+
+    avisos.classList.add('rota');
+    items[0].classList.add('is-active');
+
+    window.setInterval(() => {
+        if (!esCelular.matches || document.hidden) {
+            return;
+        }
+
+        items[avisoActual].classList.remove('is-active');
+        avisoActual = (avisoActual + 1) % items.length;
+        items[avisoActual].classList.add('is-active');
+    }, 4000);
 }
 
 const galleryModal = document.querySelector('[data-gallery-modal]');
@@ -297,8 +391,7 @@ if (plpGrid) {
     const plpEmpty = document.querySelector('[data-plp-empty]');
     const searchNote = document.querySelector('[data-plp-search-note]');
     const searchQuery = document.querySelector('[data-plp-query]');
-    const searchForm = document.querySelector('[data-search]');
-    const searchInput = searchForm ? searchForm.querySelector('input') : null;
+    const searchForms = Array.from(document.querySelectorAll('[data-search]'));
 
     const normalizar = (texto) => texto
         .normalize('NFD')
@@ -372,9 +465,13 @@ if (plpGrid) {
             searchQuery.textContent = `"${q}"`;
         }
 
-        if (searchInput && document.activeElement !== searchInput) {
-            searchInput.value = q;
-        }
+        searchForms.forEach((form) => {
+            const input = form.querySelector('input');
+
+            if (input && document.activeElement !== input) {
+                input.value = q;
+            }
+        });
 
         document.querySelectorAll('[data-cat]').forEach((link) => {
             const activo = link.dataset.cat === cat && terminos.length === 0;
@@ -405,7 +502,7 @@ if (plpGrid) {
         const query = params.toString();
         window.history.pushState(null, '', query ? `?${query}` : window.location.pathname);
         aplicarFiltro(estado);
-        menu?.classList.remove('open');
+        cerrarMenu();
         window.scrollTo({ top: 0, behavior: 'smooth' });
     };
 
@@ -421,13 +518,15 @@ if (plpGrid) {
         });
     });
 
-    if (searchForm && searchInput) {
-        searchForm.addEventListener('submit', (event) => {
+    searchForms.forEach((form) => {
+        const input = form.querySelector('input');
+
+        form.addEventListener('submit', (event) => {
             event.preventDefault();
-            irA({ cat: 'todo', q: searchInput.value.trim() });
-            searchInput.blur();
+            irA({ cat: 'todo', q: input.value.trim() });
+            input.blur();
         });
-    }
+    });
 
     window.addEventListener('popstate', () => aplicarFiltro(leerUrl()));
     aplicarFiltro(leerUrl());

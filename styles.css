@@ -979,11 +979,6 @@ h1 {
     background: #fff;
 }
 
-.products-page .header {
-    position: sticky;
-    top: 32px;
-}
-
 .plp-shell {
     width: min(1320px, calc(100% - 2rem));
     margin: 0 auto;
@@ -1506,24 +1501,6 @@ body.modal-open {
     }
 }
 
-/* Buscador como formulario: sin estilos del navegador */
-.search-box {
-    margin: 0;
-}
-
-.search-box input {
-    -webkit-appearance: none;
-    appearance: none;
-    border-radius: 0;
-}
-
-/* En tablet y celular el menu baja a su propia fila (flex 1 1 0 anulaba el width: 100%) */
-@media (max-width: 1024px) {
-    .menu {
-        flex: 0 0 100%;
-    }
-}
-
 /* Inicio: fotos completas, de cabeza a zapatos (antes se cortaban a la mitad en celular) */
 .grid-categories .category-photo {
     aspect-ratio: 2 / 3;
@@ -1576,16 +1553,333 @@ body.modal-open {
     z-index: 1;
 }
 
-/* Barra fija arriba: la franja de avisos y el menu quedan pegados al borde, a todo el ancho */
+/* =========================================================
+   Encabezado (inicio y productos)
+   Franja de avisos que se va al bajar + barra fija arriba.
+   En celular la barra se esconde al bajar y vuelve al subir
+   (clases is-scrolled / is-hidden / is-menu-open desde main.js).
+   ========================================================= */
 .top-strip {
-    position: sticky;
-    top: 0;
-    z-index: 31;
+    position: relative;
+    z-index: 41;
+    background: #111111;
+    color: #f2f2f2;
+    border-bottom: 0;
+    font-size: 0.66rem;
+    letter-spacing: 0.16em;
 }
 
-.header {
+.top-strip-inner {
+    width: min(1320px, calc(100% - 2.5rem));
+    min-height: 34px;
+    padding: 0;
+    gap: 1rem;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.top-strip-inner span,
+.top-strip-inner span:nth-child(2),
+.top-strip-inner span:nth-child(3) {
+    display: block;
+    font-weight: 500;
+}
+
+.header,
+.products-page .header {
+    position: sticky;
+    top: 0;
+    z-index: 40;
     width: 100%;
-    padding-left: max(1rem, calc((100% - 1320px) / 2));
-    padding-right: max(1rem, calc((100% - 1320px) / 2));
+    height: 68px;
+    min-height: 0;
+    margin: 0;
+    padding: 0 max(1.25rem, calc((100% - 1320px) / 2));
+    display: flex;
+    flex-wrap: nowrap;
+    align-items: center;
+    gap: 1.5rem;
+    row-gap: 0;
+    background: rgba(255, 255, 255, 0.94);
+    -webkit-backdrop-filter: saturate(180%) blur(14px);
+    backdrop-filter: saturate(180%) blur(14px);
+    border-bottom: 1px solid #f1f1f1;
+    box-shadow: none;
+    transition: transform 0.35s cubic-bezier(0.2, 0.7, 0.2, 1), box-shadow 0.25s ease, border-color 0.25s ease;
+}
+
+.header.is-scrolled {
+    border-bottom-color: #e8e8e8;
+    box-shadow: 0 8px 28px rgba(17, 17, 17, 0.07);
+}
+
+.header.is-hidden {
+    transform: translateY(-100%);
+}
+
+.header .brand {
+    flex: 1 1 0;
+    font-size: 1.5rem;
+    letter-spacing: 0.18em;
+}
+
+.header .menu {
+    position: static;
+    order: 0;
+    flex: 0 1 auto;
+    width: auto;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    gap: 2.2rem;
+    padding: 0;
+    border: 0;
+    border-radius: 0;
+    background: none;
+    box-shadow: none;
+}
+
+.header .menu a {
+    padding: 0.55rem 0;
+    font-size: 0.74rem;
+    font-weight: 600;
+    letter-spacing: 0.15em;
+}
+
+.header .menu a::after {
+    bottom: 0.2rem;
+}
+
+.header .menu a.is-active::after {
+    transform: scaleX(1);
+}
+
+.header .header-actions {
+    flex: 1 1 0;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+/* Buscador con lupa */
+.search-box {
+    position: relative;
+    display: block;
+    margin: 0;
+}
+
+.search-icon {
+    position: absolute;
+    top: 50%;
+    left: 0.9rem;
+    width: 15px;
+    height: 15px;
+    transform: translateY(-50%);
+    fill: none;
+    stroke: #7a7a7a;
+    stroke-width: 2;
+    stroke-linecap: round;
+    pointer-events: none;
+}
+
+.header .search-box input {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 210px;
+    height: 38px;
+    padding: 0 1rem 0 2.4rem;
+    border: 1px solid transparent;
+    border-radius: 999px;
+    background: #f2f2f2;
+    color: #151515;
+    font-family: 'Manrope', sans-serif;
+    font-size: 0.74rem;
+    font-weight: 500;
+    letter-spacing: 0.06em;
+    outline: none;
+    transition: background 0.2s ease, border-color 0.2s ease, width 0.25s ease;
+}
+
+.header .search-box input::placeholder {
+    color: #8a8a8a;
+    letter-spacing: 0.12em;
+}
+
+.header .search-box input:focus {
+    width: 240px;
     background: #fff;
+    border-color: #151515;
+}
+
+.header .search-box input::-webkit-search-cancel-button {
+    -webkit-appearance: none;
+}
+
+.menu-search {
+    display: none;
+}
+
+/* Boton de tres rayas que se vuelve X */
+.header .menu-toggle {
+    display: none;
+    position: relative;
+    width: 44px;
+    height: 44px;
+    margin-right: -10px;
+    padding: 0;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    color: #151515;
+    cursor: pointer;
+}
+
+.menu-toggle-bars,
+.menu-toggle-bars::before,
+.menu-toggle-bars::after {
+    position: absolute;
+    width: 22px;
+    height: 1.5px;
+    border-radius: 2px;
+    background: currentColor;
+    transition: transform 0.3s ease, top 0.3s ease, background 0.2s ease;
+}
+
+.menu-toggle-bars {
+    top: 21px;
+    left: 11px;
+}
+
+.menu-toggle-bars::before,
+.menu-toggle-bars::after {
+    content: '';
+    left: 0;
+}
+
+.menu-toggle-bars::before {
+    top: -7px;
+}
+
+.menu-toggle-bars::after {
+    top: 7px;
+}
+
+.header.is-menu-open .menu-toggle-bars {
+    background: transparent;
+}
+
+.header.is-menu-open .menu-toggle-bars::before {
+    top: 0;
+    transform: rotate(45deg);
+}
+
+.header.is-menu-open .menu-toggle-bars::after {
+    top: 0;
+    transform: rotate(-45deg);
+}
+
+/* Tablet y celular */
+@media (max-width: 860px) {
+    .top-strip-inner {
+        display: grid;
+        grid-template-columns: 1fr;
+        min-height: 32px;
+    }
+
+    .top-strip-inner span,
+    .top-strip-inner span:nth-child(2),
+    .top-strip-inner span:nth-child(3) {
+        grid-area: 1 / 1;
+        align-self: center;
+        opacity: 0;
+        transition: opacity 0.6s ease;
+    }
+
+    .top-strip-inner:not(.rota) span:first-child,
+    .top-strip-inner span.is-active {
+        opacity: 1;
+    }
+
+    .header,
+    .products-page .header {
+        height: 58px;
+        gap: 0.75rem;
+        padding: 0 1rem;
+    }
+
+    .header .brand {
+        font-size: 1.3rem;
+    }
+
+    .header .header-actions .search-box {
+        display: none;
+    }
+
+    .header .menu-toggle {
+        display: inline-block;
+    }
+
+    .header .menu {
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        flex-direction: column;
+        align-items: stretch;
+        gap: 0;
+        max-height: calc(100vh - 58px);
+        overflow-y: auto;
+        padding: 0.75rem 1rem 1.5rem;
+        background: #fff;
+        border-top: 1px solid #ececec;
+        box-shadow: 0 24px 40px rgba(17, 17, 17, 0.1);
+        opacity: 0;
+        visibility: hidden;
+        transform: translateY(-8px);
+        transition: opacity 0.22s ease, transform 0.22s ease, visibility 0s linear 0.22s;
+    }
+
+    .header.is-menu-open .menu {
+        opacity: 1;
+        visibility: visible;
+        transform: none;
+        transition: opacity 0.22s ease, transform 0.22s ease;
+    }
+
+    .header .menu a {
+        padding: 1.05rem 0.25rem;
+        border-bottom: 1px solid #f0f0f0;
+        font-size: 0.86rem;
+    }
+
+    .header .menu a::after {
+        display: none;
+    }
+
+    .header .menu a.is-active {
+        text-decoration: underline;
+        text-underline-offset: 6px;
+    }
+
+    .menu-search {
+        display: block;
+        margin-bottom: 0.5rem;
+    }
+
+    /* 16px para que el iPhone no haga zoom al tocar el buscador */
+    .header .menu-search input,
+    .header .menu-search input:focus {
+        width: 100%;
+        height: 46px;
+        font-size: 16px;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .header,
+    .header .menu,
+    .top-strip-inner span {
+        transition: none;
+    }
 }
