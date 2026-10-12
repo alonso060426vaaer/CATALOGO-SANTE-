@@ -1895,16 +1895,61 @@ body.modal-open {
     text-transform: none;
 }
 
-.footer-column .footer-instagram {
-    margin-top: 0.2rem;
-    font-weight: 700;
-    text-transform: none;
-    text-decoration: underline;
-    text-underline-offset: 4px;
-}
 
 .footer-bottom p {
     color: #6b6b6b;
     font-size: 0.8rem;
     letter-spacing: 0.02em;
+}
+
+/* Pie: un solo acceso a Instagram, el logo, como boton redondo */
+.footer-bottom {
+    margin-top: 4rem;
+    padding-top: 2rem;
+    align-items: center;
+    border-top: 1px solid #ececec;
+}
+
+.footer-brand {
+    margin-bottom: 0.6rem;
+}
+
+.social-link {
+    width: 46px;
+    height: 46px;
+    flex: 0 0 auto;
+    border: 1px solid #d6d6d6;
+    border-radius: 50%;
+    color: #151515;
+    transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+}
+
+.social-link svg {
+    width: 21px;
+    height: 21px;
+}
+
+.social-link:hover,
+.social-link:focus-visible {
+    background: #151515;
+    border-color: #151515;
+    color: #fff;
+}
+
+@media (max-width: 1024px) {
+    .footer-bottom {
+        margin-top: 3rem;
+    }
+}
+
+@media (max-width: 720px) {
+    .footer-bottom {
+        flex-direction: row;
+        align-items: center;
+        margin-top: 2.5rem;
+    }
+
+    .footer-brand {
+        margin-bottom: 0.4rem;
+    }
 }
