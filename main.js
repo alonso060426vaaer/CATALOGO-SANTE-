@@ -124,8 +124,11 @@ if (avisos && avisos.children.length > 1) {
     }, 4000);
 }
 
+// Galeria del producto: foto grande, miniaturas, colores, tallas y zoom.
 const galleryModal = document.querySelector('[data-gallery-modal]');
 const galleryImage = document.querySelector('[data-gallery-image]');
+const galleryStage = document.querySelector('[data-gallery-stage]');
+const galleryKicker = document.querySelector('[data-gallery-kicker]');
 const galleryTitle = document.querySelector('[data-gallery-title]');
 const galleryCount = document.querySelector('[data-gallery-count]');
 const galleryDots = document.querySelector('[data-gallery-dots]');
@@ -134,9 +137,56 @@ const galleryNext = document.querySelector('[data-gallery-next]');
 const galleryColorsBlock = document.querySelector('[data-gallery-colors-block]');
 const galleryColors = document.querySelector('[data-gallery-colors]');
 const galleryColorName = document.querySelector('[data-gallery-color-name]');
+const gallerySizesBlock = document.querySelector('[data-gallery-sizes-block]');
+const gallerySizes = document.querySelector('[data-gallery-sizes]');
+const conMouse = window.matchMedia('(hover: hover) and (pointer: fine)');
+const tarjetas = new WeakMap();
 let galleryImages = [];
 let galleryIndex = 0;
 let galleryTitleBase = '';
+let galleryOrigen = null;
+let ultimoFoco = null;
+
+const ETIQUETAS = {
+    mujer: 'Mujer',
+    hombre: 'Hombre',
+    batas: 'Batas'
+};
+
+const leerColores = (carousel) => {
+    try {
+        return JSON.parse(carousel.dataset.colors || '[]')
+            .filter((color) => color && Array.isArray(color.images) && color.images.length > 0);
+    } catch (error) {
+        return [];
+    }
+};
+
+const leerImagenes = (carousel) => {
+    try {
+        return JSON.parse(carousel.dataset.images || '[]');
+    } catch (error) {
+        return [];
+    }
+};
+
+const precargar = (src) => {
+    if (src) {
+        const imagen = new Image();
+        imagen.decoding = 'async';
+        imagen.src = src;
+    }
+};
+
+const quitarZoom = () => {
+    if (galleryStage) {
+        galleryStage.classList.remove('is-zoomed');
+    }
+
+    if (galleryImage) {
+        galleryImage.style.transformOrigin = '';
+    }
+};
 
 const updateGallery = () => {
     if (!galleryModal || !galleryImage || galleryImages.length === 0) {
@@ -146,18 +196,46 @@ const updateGallery = () => {
     galleryIndex = (galleryIndex + galleryImages.length) % galleryImages.length;
     const image = galleryImages[galleryIndex];
 
-    galleryImage.src = image.src;
+    quitarZoom();
+
+    if (galleryImage.getAttribute('src') !== image.src) {
+        galleryImage.classList.add('is-loading');
+        galleryImage.onload = () => galleryImage.classList.remove('is-loading');
+        galleryImage.src = image.src;
+    }
+
     galleryImage.alt = image.alt;
 
     if (galleryCount) {
         galleryCount.textContent = `${galleryIndex + 1} / ${galleryImages.length}`;
     }
 
+    const variasFotos = galleryImages.length > 1;
+    [galleryPrev, galleryNext, galleryCount].forEach((elemento) => {
+        if (elemento) {
+            elemento.hidden = !variasFotos;
+        }
+    });
+
     if (galleryDots) {
         Array.from(galleryDots.children).forEach((dot, index) => {
-            dot.classList.toggle('is-active', index === galleryIndex);
+            const activo = index === galleryIndex;
+            dot.classList.toggle('is-active', activo);
+            dot.setAttribute('aria-current', activo ? 'true' : 'false');
+
+            // Lleva la miniatura activa a la vista sin mover la pagina.
+            if (activo) {
+                galleryDots.scrollTo({
+                    left: dot.offsetLeft - (galleryDots.clientWidth - dot.offsetWidth) / 2,
+                    top: dot.offsetTop - (galleryDots.clientHeight - dot.offsetHeight) / 2,
+                    behavior: 'smooth'
+                });
+            }
         });
     }
+
+    precargar(galleryImages[(galleryIndex + 1) % galleryImages.length]?.src);
+    precargar(galleryImages[(galleryIndex - 1 + galleryImages.length) % galleryImages.length]?.src);
 };
 
 const renderThumbs = () => {
@@ -166,6 +244,8 @@ const renderThumbs = () => {
     }
 
     galleryDots.innerHTML = '';
+    galleryDots.hidden = galleryImages.length < 2;
+
     galleryImages.forEach((galleryImageItem, index) => {
         const thumb = document.createElement('button');
         const thumbImage = document.createElement('img');
@@ -173,8 +253,9 @@ const renderThumbs = () => {
         thumb.type = 'button';
         thumb.setAttribute('aria-label', `Ver foto ${index + 1} de ${galleryImages.length}`);
         thumbImage.src = galleryImageItem.src;
-        thumbImage.alt = galleryImageItem.alt;
+        thumbImage.alt = '';
         thumbImage.loading = 'lazy';
+        thumbImage.decoding = 'async';
 
         thumb.appendChild(thumbImage);
         thumb.addEventListener('click', () => {
@@ -185,18 +266,18 @@ const renderThumbs = () => {
     });
 };
 
-const selectGalleryColor = (colors, colorIndex) => {
+const selectGalleryColor = (colors, colorIndex, fotoInicial = 0) => {
     const color = colors[colorIndex];
 
     if (!color) {
         return;
     }
 
-    galleryImages = color.images.map((src) => ({
+    galleryImages = color.images.map((src, index) => ({
         src,
-        alt: `${galleryTitleBase} - ${color.name}`
+        alt: `${galleryTitleBase} - ${color.name}, foto ${index + 1}`
     }));
-    galleryIndex = 0;
+    galleryIndex = fotoInicial;
 
     if (galleryColorName) {
         galleryColorName.textContent = color.name;
@@ -210,39 +291,55 @@ const selectGalleryColor = (colors, colorIndex) => {
         });
     }
 
+    // La tarjeta del catalogo queda en el mismo color que se eligio aqui.
+    tarjetas.get(galleryOrigen)?.ponerColor(colorIndex);
+
     renderThumbs();
     updateGallery();
 };
 
-const openGallery = (carousel, startIndex) => {
+const pintarTallas = (tallas) => {
+    if (!gallerySizes || !gallerySizesBlock) {
+        return;
+    }
+
+    const lista = (tallas || '').split(/[·,]/).map((talla) => talla.trim()).filter(Boolean);
+    gallerySizes.innerHTML = '';
+    lista.forEach((talla) => {
+        const item = document.createElement('li');
+        item.textContent = talla;
+        gallerySizes.appendChild(item);
+    });
+    gallerySizesBlock.hidden = lista.length === 0;
+};
+
+const openGallery = (carousel, colorIndex = 0, startIndex = 0) => {
     if (!galleryModal || !galleryImage) {
         return;
     }
 
-    const fallbackImages = Array.from(carousel.querySelectorAll('.carousel-track img')).map((image) => ({
-        src: image.currentSrc || image.src,
-        alt: image.alt
-    }));
+    const card = carousel.closest('.plp-card');
+    const colors = leerColores(carousel);
 
-    galleryTitleBase = carousel.dataset.productTitle || fallbackImages[0]?.alt || '';
+    galleryOrigen = carousel;
+    ultimoFoco = document.activeElement;
+    galleryTitleBase = carousel.dataset.productTitle || '';
 
     if (galleryTitle) {
         galleryTitle.textContent = galleryTitleBase;
     }
 
-    let colors = [];
-
-    try {
-        colors = JSON.parse(carousel.dataset.colors || '[]');
-    } catch (error) {
-        colors = [];
+    if (galleryKicker) {
+        const categorias = (card?.dataset.categoria || '').split(' ').filter((cat) => ETIQUETAS[cat]);
+        galleryKicker.textContent = card?.hasAttribute('data-campana')
+            ? 'Colección SANTÉ 2026'
+            : categorias.map((cat) => ETIQUETAS[cat]).join(' · ');
     }
 
-    colors = colors.filter((color) => color && Array.isArray(color.images) && color.images.length > 0);
+    pintarTallas(carousel.dataset.tallas);
 
     if (galleryColorsBlock && galleryColors) {
         galleryColors.innerHTML = '';
-        // Con un solo color no hay nada que elegir: se oculta la paleta.
         galleryColorsBlock.hidden = colors.length < 2;
 
         colors.forEach((color, index) => {
@@ -264,51 +361,43 @@ const openGallery = (carousel, startIndex) => {
     document.body.classList.add('modal-open');
 
     if (colors.length > 0) {
-        selectGalleryColor(colors, 0);
-        galleryIndex = startIndex;
-        updateGallery();
-        return;
-    }
-
-    try {
-        const storedImages = JSON.parse(carousel.dataset.images || '[]');
-        galleryImages = storedImages.map((src) => ({
+        selectGalleryColor(colors, Math.min(colorIndex, colors.length - 1), startIndex);
+    } else {
+        galleryImages = leerImagenes(carousel).map((src, index) => ({
             src,
-            alt: galleryTitleBase
+            alt: `${galleryTitleBase}, foto ${index + 1}`
         }));
-    } catch (error) {
-        galleryImages = fallbackImages;
+        galleryIndex = startIndex;
+        renderThumbs();
+        updateGallery();
     }
 
-    if (galleryImages.length === 0) {
-        galleryImages = fallbackImages;
-    }
-
-    galleryIndex = startIndex;
-    renderThumbs();
-    updateGallery();
+    galleryModal.querySelector('.gallery-close')?.focus({ preventScroll: true });
 };
 
 const closeGallery = () => {
-    if (!galleryModal) {
+    if (!galleryModal || !galleryModal.classList.contains('is-open')) {
         return;
     }
 
+    quitarZoom();
     galleryModal.classList.remove('is-open');
     galleryModal.setAttribute('aria-hidden', 'true');
     document.body.classList.remove('modal-open');
+
+    if (ultimoFoco && typeof ultimoFoco.focus === 'function') {
+        ultimoFoco.focus({ preventScroll: true });
+    }
+};
+
+const moverGaleria = (paso) => {
+    galleryIndex += paso;
+    updateGallery();
 };
 
 if (galleryPrev && galleryNext) {
-    galleryPrev.addEventListener('click', () => {
-        galleryIndex -= 1;
-        updateGallery();
-    });
-
-    galleryNext.addEventListener('click', () => {
-        galleryIndex += 1;
-        updateGallery();
-    });
+    galleryPrev.addEventListener('click', () => moverGaleria(-1));
+    galleryNext.addEventListener('click', () => moverGaleria(1));
 }
 
 document.querySelectorAll('[data-gallery-close]').forEach((button) => {
@@ -322,57 +411,171 @@ document.addEventListener('keydown', (event) => {
 
     if (event.key === 'Escape') {
         closeGallery();
-    }
+    } else if (event.key === 'ArrowLeft') {
+        moverGaleria(-1);
+    } else if (event.key === 'ArrowRight') {
+        moverGaleria(1);
+    } else if (event.key === 'Tab') {
+        // El foco no se escapa de la galeria mientras esta abierta.
+        const enfocables = Array.from(galleryModal.querySelectorAll('button, a[href]'))
+            .filter((elemento) => !elemento.hidden && elemento.offsetParent !== null);
+        const primero = enfocables[0];
+        const ultimo = enfocables[enfocables.length - 1];
 
-    if (event.key === 'ArrowLeft') {
-        galleryIndex -= 1;
-        updateGallery();
-    }
-
-    if (event.key === 'ArrowRight') {
-        galleryIndex += 1;
-        updateGallery();
+        if (event.shiftKey && document.activeElement === primero) {
+            event.preventDefault();
+            ultimo.focus();
+        } else if (!event.shiftKey && document.activeElement === ultimo) {
+            event.preventDefault();
+            primero.focus();
+        }
     }
 });
 
-document.querySelectorAll('[data-carousel]').forEach((carousel) => {
-    const images = Array.from(carousel.querySelectorAll('.carousel-track img'));
-    const dots = Array.from(carousel.querySelectorAll('.carousel-dots span'));
-    const prev = carousel.querySelector('.carousel-prev');
-    const next = carousel.querySelector('.carousel-next');
-    let current = 0;
-
-    const showImage = (index) => {
-        current = (index + images.length) % images.length;
-
-        images.forEach((image, imageIndex) => {
-            image.classList.toggle('is-active', imageIndex === current);
-        });
-
-        dots.forEach((dot, dotIndex) => {
-            dot.classList.toggle('is-active', dotIndex === current);
-        });
-    };
-
-    if (prev && next && images.length > 1) {
-        prev.addEventListener('click', (event) => {
-            event.stopPropagation();
-            showImage(current - 1);
-        });
-
-        next.addEventListener('click', (event) => {
-            event.stopPropagation();
-            showImage(current + 1);
-        });
-    }
-
-    carousel.addEventListener('click', (event) => {
-        if (event.target.closest('.carousel-btn')) {
+// Zoom con el mouse: clic para acercar, mover para recorrer la prenda.
+if (galleryStage && galleryImage) {
+    galleryImage.addEventListener('click', (event) => {
+        if (!conMouse.matches) {
             return;
         }
 
-        openGallery(carousel, 0);
+        const acercar = !galleryStage.classList.contains('is-zoomed');
+        galleryStage.classList.toggle('is-zoomed', acercar);
+
+        if (acercar) {
+            const caja = galleryImage.getBoundingClientRect();
+            galleryImage.style.transformOrigin = `${((event.clientX - caja.left) / caja.width) * 100}% ${((event.clientY - caja.top) / caja.height) * 100}%`;
+        } else {
+            galleryImage.style.transformOrigin = '';
+        }
     });
+
+    galleryImage.addEventListener('mousemove', (event) => {
+        if (!galleryStage.classList.contains('is-zoomed')) {
+            return;
+        }
+
+        const caja = galleryImage.getBoundingClientRect();
+        galleryImage.style.transformOrigin = `${((event.clientX - caja.left) / caja.width) * 100}% ${((event.clientY - caja.top) / caja.height) * 100}%`;
+    });
+
+    galleryStage.addEventListener('mouseleave', quitarZoom);
+
+    // En celular se desliza con el dedo para cambiar de foto.
+    let toqueX = 0;
+    let toqueY = 0;
+
+    galleryStage.addEventListener('touchstart', (event) => {
+        toqueX = event.touches[0].clientX;
+        toqueY = event.touches[0].clientY;
+    }, { passive: true });
+
+    galleryStage.addEventListener('touchend', (event) => {
+        const dx = event.changedTouches[0].clientX - toqueX;
+        const dy = event.changedTouches[0].clientY - toqueY;
+
+        if (Math.abs(dx) > 45 && Math.abs(dx) > Math.abs(dy) * 1.3) {
+            moverGaleria(dx < 0 ? 1 : -1);
+        }
+    }, { passive: true });
+}
+
+// Tarjetas del catalogo: circulos de color, segunda foto al pasar el mouse.
+document.querySelectorAll('[data-carousel]').forEach((carousel) => {
+    const card = carousel.closest('.plp-card');
+    const track = carousel.querySelector('.carousel-track');
+    const principal = track?.querySelector('img');
+    const swatches = card?.querySelector('[data-card-swatches]');
+    const colores = leerColores(carousel);
+    const titulo = carousel.dataset.productTitle || principal?.alt || '';
+    let colorActual = 0;
+    let segunda = null;
+
+    const fotosActuales = () => (colores.length ? colores[colorActual].images : leerImagenes(carousel));
+
+    // La segunda foto se descarga recien la primera vez que se pasa el mouse.
+    const prepararSegunda = () => {
+        const fotos = fotosActuales();
+
+        if (!track || fotos.length < 2) {
+            return;
+        }
+
+        if (!segunda) {
+            segunda = document.createElement('img');
+            segunda.className = 'plp-card-alt';
+            segunda.alt = '';
+            segunda.decoding = 'async';
+            segunda.setAttribute('aria-hidden', 'true');
+            track.appendChild(segunda);
+        }
+
+        if (segunda.getAttribute('src') !== fotos[1]) {
+            segunda.src = fotos[1];
+        }
+    };
+
+    const ponerColor = (indice) => {
+        if (!colores[indice] || !principal) {
+            return;
+        }
+
+        colorActual = indice;
+        principal.src = colores[indice].images[0];
+        principal.alt = `${titulo} - ${colores[indice].name}`;
+
+        if (segunda) {
+            prepararSegunda();
+        }
+
+        swatches?.querySelectorAll('.plp-swatch').forEach((swatch, i) => {
+            swatch.setAttribute('aria-pressed', i === indice ? 'true' : 'false');
+        });
+    };
+
+    tarjetas.set(carousel, { ponerColor });
+
+    if (swatches && colores.length > 1) {
+        colores.forEach((color, indice) => {
+            const swatch = document.createElement('button');
+
+            swatch.type = 'button';
+            swatch.className = 'plp-swatch';
+            swatch.style.setProperty('--swatch', color.hex || '#ccc');
+            swatch.title = color.name;
+            swatch.setAttribute('aria-label', `Ver en ${color.name}`);
+            swatch.setAttribute('aria-pressed', indice === 0 ? 'true' : 'false');
+            swatch.addEventListener('click', (event) => {
+                event.stopPropagation();
+                ponerColor(indice);
+            });
+            swatches.appendChild(swatch);
+        });
+
+        const cuenta = document.createElement('span');
+        cuenta.className = 'plp-swatch-count';
+        cuenta.textContent = `${colores.length} colores`;
+        swatches.appendChild(cuenta);
+    }
+
+    if (card && conMouse.matches) {
+        card.addEventListener('mouseenter', prepararSegunda);
+    }
+
+    const abrir = () => openGallery(carousel, colorActual, 0);
+
+    carousel.setAttribute('role', 'button');
+    carousel.setAttribute('tabindex', '0');
+    carousel.setAttribute('aria-label', `Ver fotos de ${titulo}`);
+    carousel.addEventListener('click', abrir);
+    carousel.addEventListener('keydown', (event) => {
+        if (event.key === 'Enter' || event.key === ' ') {
+            event.preventDefault();
+            abrir();
+        }
+    });
+
+    card?.querySelector('h2')?.addEventListener('click', abrir);
 });
 
 // Catalogo: filtro por categoria (?cat=mujer|hombre|batas) y busqueda (?q=).
