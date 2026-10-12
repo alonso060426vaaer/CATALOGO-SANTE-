@@ -1883,3 +1883,28 @@ body.modal-open {
         transition: none;
     }
 }
+
+/* Pie: los enlaces de Colecciones navegan; lo demas es informacion (texto gris, sin mayusculas) */
+.footer-info p,
+.footer-feature p {
+    max-width: 32ch;
+    margin: 0;
+    color: #6b6b6b;
+    font-size: 0.9rem;
+    line-height: 1.6;
+    text-transform: none;
+}
+
+.footer-column .footer-instagram {
+    margin-top: 0.2rem;
+    font-weight: 700;
+    text-transform: none;
+    text-decoration: underline;
+    text-underline-offset: 4px;
+}
+
+.footer-bottom p {
+    color: #6b6b6b;
+    font-size: 0.8rem;
+    letter-spacing: 0.02em;
+}
