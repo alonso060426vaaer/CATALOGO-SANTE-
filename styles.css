@@ -1523,3 +1523,55 @@ body.modal-open {
         flex: 0 0 100%;
     }
 }
+
+/* Inicio: fotos completas, de cabeza a zapatos (antes se cortaban a la mitad en celular) */
+.grid-categories .category-photo {
+    aspect-ratio: 2 / 3;
+    height: auto;
+}
+
+.grid-categories .category-photo img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+}
+
+.editorial-duo .editorial-card img {
+    height: auto;
+    min-height: 0;
+    aspect-ratio: 2 / 3;
+    object-fit: cover;
+}
+
+@media (max-width: 720px) {
+    .grid-categories {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 0.75rem;
+    }
+
+    .grid-categories .category-content {
+        min-height: 44px;
+        padding-top: 0.5rem;
+    }
+
+    .grid-categories .category-card h3 {
+        margin: 0;
+        font-size: 0.8rem;
+        text-align: left;
+    }
+}
+
+/* Sombra suave abajo para que el texto blanco se lea sobre fondo claro */
+.editorial-duo .editorial-card::after {
+    content: "";
+    position: absolute;
+    inset: auto 0 0 0;
+    height: 35%;
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.45), rgba(0, 0, 0, 0));
+    pointer-events: none;
+}
+
+.editorial-duo .editorial-copy {
+    z-index: 1;
+}
