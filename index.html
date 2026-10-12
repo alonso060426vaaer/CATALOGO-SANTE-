@@ -9,7 +9,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="styles.css?v=9">
 </head>
 <body>
     <div class="top-strip" aria-label="Avisos de tienda">
@@ -24,16 +24,18 @@
         <a href="#inicio" class="brand" aria-label="SANTÉ inicio">SANTÉ</a>
 
         <nav class="menu" aria-label="Menu principal">
-            <a href="#inicio">HOME</a>
-            <a href="#destacados">LO NUEVO</a>
-            <a href="#coleccion">MUJER</a>
+            <a href="#inicio">INICIO</a>
+            <a href="productos.html?cat=mujer">MUJER</a>
+            <a href="productos.html?cat=hombre">HOMBRE</a>
+            <a href="productos.html?cat=batas">BATAS</a>
+            <a href="productos.html">VER TODO</a>
         </nav>
 
         <div class="header-actions">
-            <label class="search-box" for="search-input">
-                <input id="search-input" type="text" placeholder="BUSCAR">
-            </label>
-            <button class="menu-toggle" aria-label="Abrir menu">MENU</button>
+            <form class="search-box" action="productos.html" role="search">
+                <input type="search" name="q" placeholder="BUSCAR" aria-label="Buscar modelo o color">
+            </form>
+            <button class="menu-toggle" type="button" aria-label="Abrir menu">MENU</button>
         </div>
     </header>
 
@@ -46,7 +48,7 @@
             <div class="hero-caption reveal-up">
                 <p class="label">NUEVA COLECCION</p>
                 <h1>SANTÉ </h1>
-                <a href="#destacados" class="btn btn-solid">VER COLECCION</a>
+                <a href="productos.html" class="btn btn-solid">VER COLECCION</a>
             </div>
         </section>
 
@@ -59,7 +61,7 @@
             <div class="grid-categories">
 
                 <!-- Scrubs Mujer -->
-                <a class="category-card" href="productos.html" style="--delay: 0ms;">
+                <a class="category-card" href="productos.html?cat=mujer" style="--delay: 0ms;">
                     <div class="category-photo">
                         <img src="perfil.webp" alt="Scrubs Mujer">
                     </div>
@@ -70,9 +72,9 @@
                 </a>
 
                 <!-- Scrubs Hombre -->
-                <a class="category-card" href="productos.html" style="--delay: 70ms;">
+                <a class="category-card" href="productos.html?cat=hombre" style="--delay: 70ms;">
                     <div class="category-photo">
-                        <img src="perfil2.webp" alt="Scrubs Hombre">
+                        <img src="conjunto-medico-hombre-navy-pro-03.webp" alt="Scrubs Hombre">
                     </div>
                     <div class="category-content">
                         <h3>Scrubs Hombre</h3>
@@ -81,7 +83,7 @@
                 </a>
 
                 <!-- Batas Clinicas -->
-                <a class="category-card" href="productos.html" style="--delay: 140ms;">
+                <a class="category-card" href="productos.html?cat=batas" style="--delay: 140ms;">
                     <div class="category-photo">
                         <img src="perfil3.webp" alt="Batas Clinicas">
                     </div>
@@ -91,13 +93,13 @@
                     </div>
                 </a>
 
-                <!-- Accesorios -->
+                <!-- Catalogo completo -->
                 <a class="category-card" href="productos.html" style="--delay: 210ms;">
                     <div class="category-photo">
-                        <img src="perfil4.webp" alt="Accesorios">
+                        <img src="perfil4.webp" alt="Catalogo completo SANTÉ">
                     </div>
                     <div class="category-content">
-                        <h3>Accesorios</h3>
+                        <h3>Ver todo</h3>
                         <span aria-hidden="true">&rarr;</span>
                     </div>
                 </a>
@@ -114,7 +116,7 @@
                 </div>
             </a>
 
-            <a class="editorial-card" href="productos.html">
+            <a class="editorial-card" href="productos.html?q=beige">
                 <img src="beige.webp" alt="Coleccion beige SANTÉ">
                 <div class="editorial-copy">
                     <h2>Beige moderno</h2>
@@ -128,26 +130,24 @@
         <div class="site-footer-grid">
             <section class="footer-column">
                 <h2>Colecciones</h2>
-                <a href="#coleccion">Mujer</a>
-                <a href="#coleccion">Hombre</a>
-                <a href="#coleccion"></a>
-                <a href="#coleccion"></a>
+                <a href="productos.html?cat=mujer">Mujer</a>
+                <a href="productos.html?cat=hombre">Hombre</a>
+                <a href="productos.html?cat=batas">Batas</a>
+                <a href="productos.html">Ver todo</a>
             </section>
 
             <section class="footer-column">
                 <h2>SANTÉ</h2>
-                <a href="#inicio">Uniformes medicos</a>
-                <a href="#coleccion">Telas confortables</a>
-                <a href="#coleccion">Diseno funcional</a>
-                <a href="#coleccion">Cuidado profesional</a>
+                <a href="#inicio">Inicio</a>
+                <a href="#coleccion">Novedades</a>
+                <a href="productos.html">Catalogo 2026</a>
             </section>
 
             <section class="footer-column">
                 <h2>Ayuda</h2>
-                <a href="#coleccion">Guia de tallas</a>
-                <a href="#coleccion">Cambios y ajustes</a>
-                <a href="#coleccion">Atencion personalizada</a>
-                <a href="#coleccion">Contacto</a>
+                <a href="https://www.instagram.com/sante.medwear/" target="_blank" rel="noopener noreferrer">Guia de tallas</a>
+                <a href="https://www.instagram.com/sante.medwear/" target="_blank" rel="noopener noreferrer">Cambios y ajustes</a>
+                <a href="https://www.instagram.com/sante.medwear/" target="_blank" rel="noopener noreferrer">Atencion personalizada</a>
             </section>
 
             <section class="footer-column footer-feature">
@@ -173,6 +173,6 @@
         </div>
     </footer>
 
-    <script src="main.js"></script>
+    <script src="main.js?v=8"></script>
 </body>
 </html>

@@ -280,3 +280,155 @@ document.querySelectorAll('[data-carousel]').forEach((carousel) => {
         openGallery(carousel, 0);
     });
 });
+
+// Catalogo: filtro por categoria (?cat=mujer|hombre|batas) y busqueda (?q=).
+const plpGrid = document.querySelector('.plp-grid');
+
+if (plpGrid) {
+    const CATEGORIAS = {
+        todo: 'Todos los modelos',
+        mujer: 'Mujer',
+        hombre: 'Hombre',
+        batas: 'Batas'
+    };
+    const cards = Array.from(plpGrid.querySelectorAll('.plp-card'));
+    const plpTitle = document.querySelector('[data-plp-title]');
+    const plpCount = document.querySelector('[data-plp-count]');
+    const plpEmpty = document.querySelector('[data-plp-empty]');
+    const searchNote = document.querySelector('[data-plp-search-note]');
+    const searchQuery = document.querySelector('[data-plp-query]');
+    const searchForm = document.querySelector('[data-search]');
+    const searchInput = searchForm ? searchForm.querySelector('input') : null;
+
+    const normalizar = (texto) => texto
+        .normalize('NFD')
+        .replace(/[̀-ͯ]/g, '')
+        .toLowerCase()
+        .trim();
+
+    // Texto donde se busca: nombre, tallas, colores y categoria de cada modelo.
+    cards.forEach((card) => {
+        const carousel = card.querySelector('[data-carousel]');
+        let colores = [];
+
+        try {
+            colores = JSON.parse(carousel?.dataset.colors || '[]').map((color) => color.name);
+        } catch (error) {
+            colores = [];
+        }
+
+        card.dataset.busqueda = normalizar(`${card.textContent} ${colores.join(' ')} ${card.dataset.categoria || ''}`);
+    });
+
+    const leerUrl = () => {
+        const params = new URLSearchParams(window.location.search);
+        const cat = params.get('cat');
+
+        return {
+            cat: CATEGORIAS[cat] ? cat : 'todo',
+            q: (params.get('q') || '').trim()
+        };
+    };
+
+    const aplicarFiltro = ({ cat, q }) => {
+        const terminos = normalizar(q).split(/\s+/).filter(Boolean);
+        let visibles = 0;
+        let modelos = 0;
+
+        cards.forEach((card) => {
+            const categorias = (card.dataset.categoria || '').split(' ');
+            const enCategoria = cat === 'todo' || categorias.includes(cat);
+            const enBusqueda = terminos.every((termino) => card.dataset.busqueda.includes(termino));
+            const mostrar = enCategoria && enBusqueda;
+
+            card.hidden = !mostrar;
+
+            if (mostrar) {
+                visibles += 1;
+
+                if (!card.hasAttribute('data-campana')) {
+                    modelos += 1;
+                }
+            }
+        });
+
+        // Filtrado: cuadricula pareja; en "Todo" se queda el diseño por filas.
+        plpGrid.classList.toggle('is-filtered', cat !== 'todo' || terminos.length > 0);
+
+        if (plpTitle) {
+            plpTitle.textContent = CATEGORIAS[cat];
+        }
+
+        if (plpCount) {
+            plpCount.textContent = `${modelos} ${modelos === 1 ? 'modelo' : 'modelos'}`;
+        }
+
+        if (plpEmpty) {
+            plpEmpty.hidden = visibles > 0;
+        }
+
+        if (searchNote && searchQuery) {
+            searchNote.hidden = terminos.length === 0;
+            searchQuery.textContent = `"${q}"`;
+        }
+
+        if (searchInput && document.activeElement !== searchInput) {
+            searchInput.value = q;
+        }
+
+        document.querySelectorAll('[data-cat]').forEach((link) => {
+            const activo = link.dataset.cat === cat && terminos.length === 0;
+
+            link.classList.toggle('is-active', activo);
+
+            if (activo) {
+                link.setAttribute('aria-current', 'page');
+            } else {
+                link.removeAttribute('aria-current');
+            }
+        });
+
+        document.title = cat === 'todo' ? 'SANTÉ | Productos' : `SANTÉ | ${CATEGORIAS[cat]}`;
+    };
+
+    const irA = (estado) => {
+        const params = new URLSearchParams();
+
+        if (estado.cat !== 'todo') {
+            params.set('cat', estado.cat);
+        }
+
+        if (estado.q) {
+            params.set('q', estado.q);
+        }
+
+        const query = params.toString();
+        window.history.pushState(null, '', query ? `?${query}` : window.location.pathname);
+        aplicarFiltro(estado);
+        menu?.classList.remove('open');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
+
+    // Los enlaces de categoria de esta misma pagina filtran sin recargar.
+    document.querySelectorAll('a[data-cat]').forEach((link) => {
+        link.addEventListener('click', (event) => {
+            if (event.ctrlKey || event.metaKey || event.shiftKey || event.button !== 0) {
+                return;
+            }
+
+            event.preventDefault();
+            irA({ cat: link.dataset.cat, q: '' });
+        });
+    });
+
+    if (searchForm && searchInput) {
+        searchForm.addEventListener('submit', (event) => {
+            event.preventDefault();
+            irA({ cat: 'todo', q: searchInput.value.trim() });
+            searchInput.blur();
+        });
+    }
+
+    window.addEventListener('popstate', () => aplicarFiltro(leerUrl()));
+    aplicarFiltro(leerUrl());
+}

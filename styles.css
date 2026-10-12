@@ -1505,3 +1505,21 @@ body.modal-open {
         padding-inline: 0;
     }
 }
+
+/* Buscador como formulario: sin estilos del navegador */
+.search-box {
+    margin: 0;
+}
+
+.search-box input {
+    -webkit-appearance: none;
+    appearance: none;
+    border-radius: 0;
+}
+
+/* En tablet y celular el menu baja a su propia fila (flex 1 1 0 anulaba el width: 100%) */
+@media (max-width: 1024px) {
+    .menu {
+        flex: 0 0 100%;
+    }
+}

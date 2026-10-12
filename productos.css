@@ -468,3 +468,169 @@ body.modal-open {
     color: #444;
 }
 }
+
+/* Colores debajo de cada modelo, tambien en escritorio */
+.products-page .plp-card-colores {
+    padding: 0.7rem 1.25rem 0.4rem;
+    font-size: 0.8rem;
+    color: #888;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+.products-page .plp-card-colores::before {
+    content: 'Colores: ';
+    font-weight: 600;
+    color: #444;
+}
+
+.products-page .search-box input {
+    height: 40px;
+}
+
+.products-page .menu a.is-active::after {
+    transform: scaleX(1);
+}
+
+/* Barra de categorias: Todo / Mujer / Hombre / Batas */
+.products-page .plp-bar {
+    padding: 1.6rem 1.55rem 1.2rem;
+    margin-bottom: 1.6rem;
+    border-bottom: 1px solid #eeeeee;
+}
+
+.products-page .plp-bar-head {
+    display: flex;
+    align-items: baseline;
+    flex-wrap: wrap;
+    gap: 0.4rem 0.9rem;
+    margin-bottom: 1rem;
+}
+
+.products-page .plp-bar-head h1 {
+    margin: 0;
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: clamp(1.45rem, 2.3vw, 2rem);
+    font-weight: 600;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+}
+
+.products-page .plp-bar-head span {
+    color: #777;
+    font-size: 0.9rem;
+}
+
+.products-page .plp-tabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.products-page .plp-tabs a {
+    padding: 0.55rem 1.2rem;
+    border: 1px solid #d4d4d4;
+    border-radius: 999px;
+    color: #151515;
+    font-size: 0.82rem;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    text-decoration: none;
+    text-transform: uppercase;
+    transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+
+.products-page .plp-tabs a:hover {
+    border-color: #151515;
+}
+
+.products-page .plp-tabs a.is-active {
+    background: #151515;
+    border-color: #151515;
+    color: #fff;
+}
+
+.products-page .plp-search-note {
+    margin: 1rem 0 0;
+    font-size: 0.9rem;
+    color: #555;
+}
+
+.products-page .plp-search-note a,
+.products-page .plp-empty a {
+    margin-left: 0.6rem;
+    color: #151515;
+    font-weight: 600;
+}
+
+.products-page .plp-search-note[hidden],
+.products-page .plp-empty[hidden],
+.products-page .plp-card[hidden] {
+    display: none !important;
+}
+
+.products-page .plp-empty {
+    padding: 4rem 1.5rem;
+    text-align: center;
+    color: #555;
+}
+
+/* Con filtro: cuadricula pareja y centrada */
+.products-page .plp-grid.is-filtered {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    row-gap: 2rem;
+}
+
+.products-page .plp-grid.is-filtered .plp-card {
+    flex: 0 0 33.3333%;
+}
+
+@media (min-width: 1101px) {
+    .products-page .plp-grid.is-filtered .product-carousel {
+        height: clamp(520px, 42vw, 760px);
+    }
+
+    /* Fila 3 (Oxford y campaña) ocupa todo el ancho */
+    .products-page .plp-card.fila3 {
+        grid-column: span 6;
+    }
+
+    .products-page .plp-card.fila3 .product-carousel {
+        height: clamp(520px, 42vw, 760px);
+    }
+}
+
+@media (max-width: 1100px) {
+    .products-page .plp-grid.is-filtered .plp-card {
+        flex-basis: 50%;
+    }
+
+    .products-page .plp-grid.is-filtered .product-carousel {
+        height: clamp(330px, 52vw, 560px);
+    }
+}
+
+@media (max-width: 760px) {
+    .products-page .menu.open {
+        display: flex;
+    }
+
+    .products-page .plp-bar {
+        padding: 1.1rem 1rem 1rem;
+        margin-bottom: 1.2rem;
+    }
+
+    .products-page .plp-tabs a {
+        padding: 0.5rem 0.95rem;
+    }
+
+    .products-page .plp-grid.is-filtered {
+        row-gap: 1.35rem;
+    }
+
+    .products-page .plp-grid.is-filtered .product-carousel {
+        height: clamp(260px, 64vw, 380px);
+    }
+}
